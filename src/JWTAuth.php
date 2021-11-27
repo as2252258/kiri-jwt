@@ -4,7 +4,9 @@ namespace Kiri\Jwt;
 
 use Database\Model;
 use Exception;
+use Kiri\Abstracts\Config;
 use Kiri\Error\Logger;
+use Kiri\Exception\ConfigException;
 use Kiri\Kiri;
 use Lcobucci\Clock\SystemClock;
 use Lcobucci\JWT\Builder;
@@ -21,96 +23,104 @@ use Psr\Container\NotFoundExceptionInterface;
 class JWTAuth implements JWTAuthInterface
 {
 
-	/**
-	 * @var string
-	 */
-	public string $iss = 'http://example.com';
+    /**
+     * @var string
+     */
+    public string $iss = 'http://example.com';
 
-	/**
-	 * @var string
-	 */
-	public string $aud = 'http://example.org';
+    /**
+     * @var string
+     */
+    public string $aud = 'http://example.org';
 
-	/**
-	 * @var string
-	 */
-	public string $jti = '4f1g23a12aa';
+    /**
+     * @var string
+     */
+    public string $jti = '4f1g23a12aa';
 
-	/**
-	 * @var string
-	 */
-	private string $iat = \DateTimeImmutable::class;
+    /**
+     * @var string
+     */
+    private string $iat = \DateTimeImmutable::class;
 
-	/**
-	 * @var array
-	 */
-	public array $nbf = [1, 'second'];
+    /**
+     * @var array
+     */
+    public array $nbf = [1, 'second'];
 
-	/**
-	 * @var array|string[]
-	 */
-	public array $exp = [5, 'seconds'];
+    /**
+     * @var array|string[]
+     */
+    public array $exp = [5, 'seconds'];
 
-	/**
-	 * @var string
-	 */
-	public string $claim = 'userId';
+    /**
+     * @var string
+     */
+    public string $claim = 'userId';
 
-	/**
-	 * @var array|string[]
-	 */
-	public array $headers = ['foo' => 'bar'];
-
-
-	/**
-	 * @var string|Model
-	 */
-	public string|Model $model;
+    /**
+     * @var array|string[]
+     */
+    public array $headers = ['foo' => 'bar'];
 
 
-	/**
-	 * @var Configuration
-	 */
-	private Configuration $configuration;
+    /**
+     * @var string|Model
+     */
+    public string|Model $model;
 
 
-	/**
-	 * @var ContainerInterface
-	 */
-	private ContainerInterface $container;
+    /**
+     * @var Configuration
+     */
+    private Configuration $configuration;
 
 
-	/**
-	 * @var Builder|null
-	 */
-	private ?Builder $builder = null;
+    /**
+     * @var ContainerInterface
+     */
+    private ContainerInterface $container;
 
 
-	/**
-	 *
-	 */
-	public function init(): void
-	{
-		$this->configuration = Configuration::forSymmetricSigner(new Sha256(),
-			InMemory::base64Encoded('mBC5v1sOKVvbdEitdSBenu59nfNfhwkedkJVNabosTw='));
-		$this->configuration->setValidationConstraints(...[
-			new SignedWith($this->configuration->signer(), $this->configuration->signingKey()),
-			new StrictValidAt(new SystemClock(new \DateTimeZone('Asia/Shanghai')))
-		]);
-		$this->container = Kiri::getDi();
-	}
+    /**
+     * @var Builder|null
+     */
+    private ?Builder $builder = NULL;
 
 
-	/**
-	 * @param $key
-	 * @param $value
-	 * @return $this
-	 */
-	public function withHeader($key, $value): static
-	{
-		$this->headers[$key] = $value;
-		return $this;
-	}
+    /**
+     * @var array
+     */
+    public array $sso = [];
+
+
+    /**
+     *
+     * @throws ConfigException
+     */
+    public function init(): void
+    {
+        $this->configuration = Configuration::forSymmetricSigner(new Sha256(),
+            InMemory::base64Encoded('mBC5v1sOKVvbdEitdSBenu59nfNfhwkedkJVNabosTw='));
+        $this->configuration->setValidationConstraints(...[
+            new SignedWith($this->configuration->signer(), $this->configuration->signingKey()),
+            new StrictValidAt(new SystemClock(new \DateTimeZone('Asia/Shanghai'))),
+        ]);
+        $this->container = Kiri::getDi();
+        Kiri::configure($this, Config::get('jwt', []));
+    }
+
+
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     */
+    public function withHeader($key, $value): static
+    {
+        $this->headers[$key] = $value;
+        return $this;
+    }
 
 
     /**
@@ -119,15 +129,15 @@ class JWTAuth implements JWTAuthInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-	public function create(int|string $value = null): string
-	{
-		if (!$this->builder) {
-			$this->_create();
-		}
-		return $this->builder->withClaim($this->claim, $value)
-			->getToken($this->configuration->signer(), $this->configuration->signingKey())
-			->toString();
-	}
+    public function create(int|string $value = NULL): string
+    {
+        if (!$this->builder) {
+            $this->_create();
+        }
+        return $this->builder->withClaim($this->claim, $value)
+            ->getToken($this->configuration->signer(), $this->configuration->signingKey())
+            ->toString();
+    }
 
 
     /**
@@ -137,38 +147,38 @@ class JWTAuth implements JWTAuthInterface
      * @throws NotFoundExceptionInterface
      * @throws Exception
      */
-	public function refresh(string $jwt): string
-	{
-		$value = $this->getUniqueId($jwt);
+    public function refresh(string $jwt): string
+    {
+        $value = $this->getUniqueId($jwt);
 
-		return $this->create($value);
-	}
-
-
-	/**
-	 * @param string $jwt
-	 * @return UnencryptedToken
-	 * @throws Exception
-	 */
-	public function parsing(string $jwt): UnencryptedToken
-	{
-		$parsing = $this->configuration->parser()->parse($jwt);
-
-		assert($parsing instanceof UnencryptedToken);
-
-		return $parsing;
-	}
+        return $this->create($value);
+    }
 
 
-	/**
-	 * @param string $jwt
-	 * @return int|string
-	 * @throws Exception
-	 */
-	public function getUniqueId(string $jwt): int|string
-	{
-		return $this->parsing($jwt)->claims()->get($this->claim);
-	}
+    /**
+     * @param string $jwt
+     * @return UnencryptedToken
+     * @throws Exception
+     */
+    public function parsing(string $jwt): UnencryptedToken
+    {
+        $parsing = $this->configuration->parser()->parse($jwt);
+
+        assert($parsing instanceof UnencryptedToken);
+
+        return $parsing;
+    }
+
+
+    /**
+     * @param string $jwt
+     * @return int|string
+     * @throws Exception
+     */
+    public function getUniqueId(string $jwt): int|string
+    {
+        return $this->parsing($jwt)->claims()->get($this->claim);
+    }
 
 
     /**
@@ -178,64 +188,64 @@ class JWTAuth implements JWTAuthInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-	public function validating(string $jwt, array $constraints = []): bool|UnencryptedToken
-	{
-		try {
-			$parse = $this->parsing($jwt);
-			if (empty($constraints)) {
-				$constraints = $this->configuration->validationConstraints();
-			}
-			$bool = $this->configuration->validator()->validate($parse, ...$constraints);
-			if (!$bool) {
-				return false;
-			}
-			return $parse;
-		} catch (\Throwable $e) {
-			$this->container->get(Logger::class)->error($e->getMessage());
-			return false;
-		}
-	}
+    public function validating(string $jwt, array $constraints = []): bool|UnencryptedToken
+    {
+        try {
+            $parse = $this->parsing($jwt);
+            if (empty($constraints)) {
+                $constraints = $this->configuration->validationConstraints();
+            }
+            $bool = $this->configuration->validator()->validate($parse, ...$constraints);
+            if (!$bool) {
+                return FALSE;
+            }
+            return $parse;
+        } catch (\Throwable $e) {
+            $this->container->get(Logger::class)->error($e->getMessage());
+            return FALSE;
+        }
+    }
 
 
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-	private function _create(): void
-	{
-		$this->builder = $this->configuration->builder()->issuedBy($this->iss)
-			->permittedFor($this->aud)->identifiedBy($this->jti)
-			->withClaim($this->claim, 1)
-			->withHeader('foo', 'bar');
+    private function _create(): void
+    {
+        $this->builder = $this->configuration->builder()->issuedBy($this->iss)
+            ->permittedFor($this->aud)->identifiedBy($this->jti)
+            ->withClaim($this->claim, 1)
+            ->withHeader('foo', 'bar');
 
-		$this->_date();
-		if (empty($this->headers) || !is_array($this->headers)) {
-			return;
-		}
-		foreach ($this->headers as $key => $header) {
-			$this->builder->withHeader($key, $header);
-		}
-	}
+        $this->_date();
+        if (empty($this->headers) || !is_array($this->headers)) {
+            return;
+        }
+        foreach ($this->headers as $key => $header) {
+            $this->builder->withHeader($key, $header);
+        }
+    }
 
 
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-	private function _date(): void
-	{
-		/** @var \DateTimeImmutable $dateTimeImmutable */
-		$dateTimeImmutable = $this->container->get($this->iat);
-		$this->builder->issuedAt($dateTimeImmutable);
-		if (is_array($this->nbf) && count($this->nbf) == 2) {
-			[$nb1, $nb2] = $this->nbf;
-			$this->builder->canOnlyBeUsedAfter($dateTimeImmutable->modify('+' . $nb1 . ' ' . $nb2));
-		}
-		if (is_array($this->exp) && count($this->exp) == 2) {
-			[$nb1, $nb2] = $this->exp;
-			$this->builder->expiresAt($dateTimeImmutable->modify('+' . $nb1 . ' ' . $nb2));
-		}
-	}
+    private function _date(): void
+    {
+        /** @var \DateTimeImmutable $dateTimeImmutable */
+        $dateTimeImmutable = $this->container->get($this->iat);
+        $this->builder->issuedAt($dateTimeImmutable);
+        if (is_array($this->nbf) && count($this->nbf) == 2) {
+            [$nb1, $nb2] = $this->nbf;
+            $this->builder->canOnlyBeUsedAfter($dateTimeImmutable->modify('+' . $nb1 . ' ' . $nb2));
+        }
+        if (is_array($this->exp) && count($this->exp) == 2) {
+            [$nb1, $nb2] = $this->exp;
+            $this->builder->expiresAt($dateTimeImmutable->modify('+' . $nb1 . ' ' . $nb2));
+        }
+    }
 
 
 }
