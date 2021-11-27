@@ -14,9 +14,11 @@ use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
-class JWT
+class JWTAuth implements JWTAuthInterface
 {
 
 	/**
@@ -111,10 +113,12 @@ class JWT
 	}
 
 
-	/**
-	 * @param int|string|null $value
-	 * @return string
-	 */
+    /**
+     * @param int|string|null $value
+     * @return string
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
 	public function create(int|string $value = null): string
 	{
 		if (!$this->builder) {
@@ -126,11 +130,13 @@ class JWT
 	}
 
 
-	/**
-	 * @param string $jwt
-	 * @return string
-	 * @throws Exception
-	 */
+    /**
+     * @param string $jwt
+     * @return string
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws Exception
+     */
 	public function refresh(string $jwt): string
 	{
 		$value = $this->getUniqueId($jwt);
@@ -165,12 +171,13 @@ class JWT
 	}
 
 
-	/**
-	 * @param string $jwt
-	 * @param array $constraints
-	 * @return bool|UnencryptedToken
-	 * @throws Exception
-	 */
+    /**
+     * @param string $jwt
+     * @param array $constraints
+     * @return bool|UnencryptedToken
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
 	public function validating(string $jwt, array $constraints = []): bool|UnencryptedToken
 	{
 		try {
@@ -190,9 +197,10 @@ class JWT
 	}
 
 
-	/**
-	 *
-	 */
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
 	private function _create(): void
 	{
 		$this->builder = $this->configuration->builder()->issuedBy($this->iss)
@@ -210,9 +218,10 @@ class JWT
 	}
 
 
-	/**
-	 *
-	 */
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
 	private function _date(): void
 	{
 		/** @var \DateTimeImmutable $dateTimeImmutable */
