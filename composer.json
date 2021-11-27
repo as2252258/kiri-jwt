@@ -1,0 +1,21 @@
+{
+  "name": "game-worker/kiri-jwt",
+  "description": "kiri-jwt",
+  "authors": [
+    {
+      "name": "XiangLin",
+      "email": "as2252258@163.com"
+    }
+  ],
+  "license": "MIT",
+  "require": {
+    "php": ">=8.0",
+    "ext-json": "*",
+    "lcobucci/jwt": "^4.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kiri\\Jwt\\": "src/"
+    }
+  }
+}
