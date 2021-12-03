@@ -4,6 +4,7 @@ namespace Kiri\Jwt;
 
 use Database\Model;
 use Exception;
+use Kiri\Abstracts\BaseObject;
 use Kiri\Abstracts\Config;
 use Kiri\Error\Logger;
 use Kiri\Exception\ConfigException;
@@ -20,7 +21,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
-class JWTAuth implements JWTAuthInterface
+class JWTAuth extends BaseObject implements JWTAuthInterface
 {
 
 	/**
@@ -77,12 +78,6 @@ class JWTAuth implements JWTAuthInterface
 
 
 	/**
-	 * @var ContainerInterface
-	 */
-	private ContainerInterface $container;
-
-
-	/**
 	 * @var Builder|null
 	 */
 	private ?Builder $builder = NULL;
@@ -106,7 +101,6 @@ class JWTAuth implements JWTAuthInterface
 			new SignedWith($this->configuration->signer(), $this->configuration->signingKey()),
 			new StrictValidAt(new SystemClock(new \DateTimeZone('Asia/Shanghai'))),
 		]);
-		$this->container = Kiri::getDi();
 		$this->configure();
 	}
 
