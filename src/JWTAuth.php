@@ -4,7 +4,7 @@ namespace Kiri\Jwt;
 
 use Database\Model;
 use Exception;
-use Kiri\Abstracts\BaseObject;
+use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Error\Logger;
 use Kiri\Exception\ConfigException;
@@ -22,7 +22,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
-class JWTAuth extends BaseObject implements JWTAuthInterface
+class JWTAuth extends Component implements JWTAuthInterface
 {
 
 	/**
