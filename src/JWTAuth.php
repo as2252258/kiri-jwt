@@ -17,6 +17,7 @@ use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
+use Note\Inject;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -87,6 +88,13 @@ class JWTAuth extends BaseObject implements JWTAuthInterface
 	 * @var array
 	 */
 	public array $sso = [];
+
+
+	/**
+	 * @var ContainerInterface
+	 */
+	#[Inject(ContainerInterface::class)]
+	public ContainerInterface $container;
 
 
 	/**
