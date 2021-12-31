@@ -4,6 +4,10 @@ namespace Kiri\Jwt;
 
 use Lcobucci\JWT\UnencryptedToken;
 
+
+/**
+ * @mixin JWTAuth
+ */
 interface JWTAuthInterface
 {
 
