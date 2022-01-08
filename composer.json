@@ -15,7 +15,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Kiri\\Jwt\\": "src/"
+      "Kiri\\Jwt\\": "./"
     }
   }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Kiri\Jwt;
 
 
-use Note\Inject;
+use Kiri\Annotation\Inject;
 use Kiri\Kiri;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
