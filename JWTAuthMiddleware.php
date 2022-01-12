@@ -6,7 +6,7 @@ namespace Kiri\Jwt;
 
 
 use Kiri\Annotation\Inject;
-use Kiri\Kiri;
+use Kiri;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -17,7 +17,7 @@ use ReflectionException;
 
 /**
  * Class CoreMiddleware
- * @package Kiri\Kiri\Route
+ * @package Kiri\Route
  * 跨域中间件
  */
 class JWTAuthMiddleware implements MiddlewareInterface

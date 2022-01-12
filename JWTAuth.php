@@ -8,7 +8,7 @@ use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
 use Kiri\Error\Logger;
 use Kiri\Exception\ConfigException;
-use Kiri\Kiri;
+use Kiri;
 use Lcobucci\Clock\SystemClock;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Configuration;
