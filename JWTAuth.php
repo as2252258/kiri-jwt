@@ -216,7 +216,7 @@ class JWTAuth extends Component implements JWTAuthInterface
 			}
 			return $parse;
 		} catch (\Throwable $e) {
-			$this->container->get(Logger::class)->error($e->getMessage());
+			$this->getContainer()->get(Logger::class)->error($e->getMessage());
 			return FALSE;
 		}
 	}
@@ -250,7 +250,7 @@ class JWTAuth extends Component implements JWTAuthInterface
 	private function _date(): void
 	{
 		/** @var \DateTimeImmutable $dateTimeImmutable */
-		$dateTimeImmutable = $this->container->get($this->iat);
+		$dateTimeImmutable = $this->getContainer()->get($this->iat);
 		$this->builder->issuedAt($dateTimeImmutable);
 		if (is_array($this->nbf) && count($this->nbf) == 2) {
 			[$nb1, $nb2] = $this->nbf;
