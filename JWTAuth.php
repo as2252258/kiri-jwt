@@ -4,11 +4,12 @@ namespace Kiri\Jwt;
 
 use Database\Model;
 use Exception;
+use Kiri;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
+use Kiri\Annotation\Inject;
 use Kiri\Error\StdoutLoggerInterface;
 use Kiri\Exception\ConfigException;
-use Kiri;
 use Lcobucci\Clock\SystemClock;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Configuration;
@@ -17,7 +18,6 @@ use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
-use Kiri\Annotation\Inject;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -95,6 +95,10 @@ class JWTAuth extends Component implements JWTAuthInterface
 	 */
 	#[Inject(ContainerInterface::class)]
 	public ContainerInterface $container;
+
+
+	#[Inject(StdoutLoggerInterface::class)]
+	public StdoutLoggerInterface $logger;
 
 
 	/**
@@ -216,7 +220,7 @@ class JWTAuth extends Component implements JWTAuthInterface
 			}
 			return $parse;
 		} catch (\Throwable $e) {
-			$this->getContainer()->get(StdoutLoggerInterface::class)->error($e->getMessage());
+			$this->logger->error($e->getMessage());
 			return FALSE;
 		}
 	}
