@@ -6,7 +6,7 @@ use Database\Model;
 use Exception;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
-use Kiri\Error\Logger;
+use Kiri\Error\StdoutLogger;
 use Kiri\Exception\ConfigException;
 use Kiri;
 use Lcobucci\Clock\SystemClock;
@@ -216,7 +216,7 @@ class JWTAuth extends Component implements JWTAuthInterface
 			}
 			return $parse;
 		} catch (\Throwable $e) {
-			$this->getContainer()->get(Logger::class)->error($e->getMessage());
+			$this->getContainer()->get(StdoutLogger::class)->error($e->getMessage());
 			return FALSE;
 		}
 	}
