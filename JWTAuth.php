@@ -91,17 +91,6 @@ class JWTAuth extends Component implements JWTAuthInterface
 
 
 	/**
-	 * @var ContainerInterface
-	 */
-	#[Inject(ContainerInterface::class)]
-	public ContainerInterface $container;
-
-
-	#[Inject(StdoutLoggerInterface::class)]
-	public StdoutLoggerInterface $logger;
-
-
-	/**
 	 *
 	 * @throws ConfigException
 	 */
