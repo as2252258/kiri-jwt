@@ -7,8 +7,6 @@ use Exception;
 use Kiri;
 use Kiri\Abstracts\Component;
 use Kiri\Abstracts\Config;
-use Kiri\Annotation\Inject;
-use Kiri\Error\StdoutLoggerInterface;
 use Kiri\Exception\ConfigException;
 use Lcobucci\Clock\SystemClock;
 use Lcobucci\JWT\Builder;
@@ -88,6 +86,17 @@ class JWTAuth extends Component implements JWTAuthInterface
 	 * @var array
 	 */
 	public array $sso = [];
+
+
+	/**
+	 * @param ContainerInterface $container
+	 * @param array $config
+	 * @throws Exception
+	 */
+	public function __construct(public ContainerInterface $container, array $config = [])
+	{
+		parent::__construct($config);
+	}
 
 
 	/**
@@ -243,13 +252,13 @@ class JWTAuth extends Component implements JWTAuthInterface
 	private function _date(): void
 	{
 		/** @var \DateTimeImmutable $dateTimeImmutable */
-		$dateTimeImmutable = $this->getContainer()->get($this->iat);
+		$dateTimeImmutable = $this->container->get($this->iat);
 		$this->builder->issuedAt($dateTimeImmutable);
-		if (is_array($this->nbf) && count($this->nbf) == 2) {
+		if (count($this->nbf) == 2) {
 			[$nb1, $nb2] = $this->nbf;
 			$this->builder->canOnlyBeUsedAfter($dateTimeImmutable->modify('+' . $nb1 . ' ' . $nb2));
 		}
-		if (is_array($this->exp) && count($this->exp) == 2) {
+		if (count($this->exp) == 2) {
 			[$nb1, $nb2] = $this->exp;
 			$this->builder->expiresAt($dateTimeImmutable->modify('+' . $nb1 . ' ' . $nb2));
 		}

@@ -28,17 +28,21 @@ class JWTAuthMiddleware implements MiddlewareInterface
 	public int $zOrder = 0;
 
 
-	#[Inject(ResponseInterface::class)]
-	public ResponseInterface $response;
+	/**
+	 * @param ResponseInterface $response
+	 * @param JWTAuth $auth
+	 */
+	public function __construct(public ResponseInterface  $response, public JWTAuth $auth)
+	{
+	}
 
 
-    /**
+	/**
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
      * @return \Psr\Http\Message\ResponseInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws ReflectionException
      */
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): \Psr\Http\Message\ResponseInterface
 	{
@@ -50,7 +54,7 @@ class JWTAuthMiddleware implements MiddlewareInterface
 			return $this->response->json(['code' => 401, 'JWT Voucher Format Error.']);
 		}
 		$authorization = str_replace('Bearer ', '', $authorization);
-		if (!Kiri::di()->get(JWTAuth::class)->validating($authorization)) {
+		if (!$this->auth->validating($authorization)) {
 			return $this->response->json(['code' => 401, 'JWT Validator fail.']);
 		}
 		return $handler->handle($request);
