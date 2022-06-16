@@ -17,7 +17,7 @@ use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
 use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
+use Kiri\Di\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 class JWTAuth extends Component implements JWTAuthInterface
