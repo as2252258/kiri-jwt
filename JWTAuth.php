@@ -107,10 +107,14 @@ class JWTAuth extends Component implements JWTAuthInterface
 	{
 		$this->configuration = Configuration::forSymmetricSigner(new Sha256(),
 			InMemory::base64Encoded('mBC5v1sOKVvbdEitdSBenu59nfNfhwkedkJVNabosTw='));
-		$this->configuration->setValidationConstraints(...[
-			new SignedWith($this->configuration->signer(), $this->configuration->signingKey()),
-			new StrictValidAt(new SystemClock(new \DateTimeZone('Asia/Shanghai'))),
-		]);
+
+        $timezone = new \DateTimeZone(\DateTimeZone::UTC);
+        var_dump($timezone);
+
+		$this->configuration->setValidationConstraints(
+            new SignedWith($this->configuration->signer(), $this->configuration->signingKey()),
+            new StrictValidAt(new SystemClock($timezone))
+        );
 		$this->configure();
 	}
 
