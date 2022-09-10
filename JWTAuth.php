@@ -252,7 +252,7 @@ class JWTAuth extends Component implements JWTAuthInterface
 	private function _date(): void
 	{
 		/** @var \DateTimeImmutable $dateTimeImmutable */
-		$dateTimeImmutable = $this->container->get($this->iat);
+		$dateTimeImmutable = $this->container->make($this->iat, [time()]);
 		$this->builder->issuedAt($dateTimeImmutable);
 		if (count($this->nbf) == 2) {
 			[$nb1, $nb2] = $this->nbf;
